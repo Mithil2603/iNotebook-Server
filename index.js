@@ -3,11 +3,10 @@ import { connectToMongo } from "./db.js";
 
 const app = express();
 const port = 8000;
-
 connectToMongo();
 
 app.get("/", (req, res) => {
-    res.send("Hello World")
+    res.send("Hello Mithil");
 })
 
 app.listen(port, ()=> {

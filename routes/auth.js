@@ -1,7 +1,11 @@
+import dotenv from "dotenv";
 import express from "express";
 import User from "../models/User.js";
 import { body, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -32,16 +36,39 @@ router.post(
       }
 
       // Hash the password
-      const saltRounds = 10;
+      //   const saltRounds = 10;  // or
+      const saltRounds = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // create user if all validations passed
-      await User.create({
+      // user variable is creating for generating jwt token below
+      const user = await User.create({
         name,
         email,
         password: hashedPassword, // hash password to store in Database
       });
-      res.status(201).json({ message: "User created Successfully!" });
+
+      // sending jwt token on registration success
+      const data = {
+        user: {
+          id: user.id,
+        },
+      };
+      const jwtToken = jwt.sign(data, process.env.JWT_SECRET, {
+        expiresIn: "7d", // expires in 7 days
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "User created successfully!",
+        token: jwtToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      });
+      
     } catch (err) {
       console.error(
         `[${new Date().toISOString()}] Error Creating User: `,

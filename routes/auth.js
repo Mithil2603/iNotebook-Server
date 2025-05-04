@@ -5,9 +5,9 @@ import bcrypt from "bcrypt";
 
 const router = express.Router();
 
-// Create a user using: POST "/api/auth/"
+// Create a user using: POST "/api/auth/createuser"
 router.post(
-  "/",
+  "/createuser",
   [
     body("name", "Enter a valid name").isLength({ min: 3 }),
     body("email", "Enter a valid email").isEmail(),
@@ -17,6 +17,7 @@ router.post(
   ],
   async (req, res) => {
     try {
+      // if there are errors, return bad requests and errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -34,10 +35,11 @@ router.post(
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+      // create user if all validations passed
       await User.create({
         name,
         email,
-        password: hashedPassword,
+        password: hashedPassword, // hash password to store in Database
       });
       res.status(201).json({ message: "User created Successfully!" });
     } catch (err) {

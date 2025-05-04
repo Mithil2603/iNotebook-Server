@@ -21,4 +21,16 @@ const userSchema = new Schema({
   },
 });
 
-export default mongoose.model('user', userSchema);
+const User = mongoose.model('user', userSchema);
+
+// Index: Handle index creation with async function
+(async () => {
+  try {
+    await User.createIndexes();
+    console.log("Indexes created for User model");
+  } catch (err) {
+    console.error("Error creating indexes: ", err.message);
+  }
+})();
+
+export default User;
